@@ -13,14 +13,16 @@ services:
     networks:
       - frontend-network
       - backend-network
+    restart: unless-stopped
 
   frontend:
     image: welannn/urban-ko-admin:${BACK_VERSION_TAG}
+    pull_policy: always
     container_name: admin-front-uko
     expose:
       - "80"
     environment:
-      - VITE_APP_API_URL=${VITE_APP_API_URL}
+      - VITE_APP_API_URL=/api
     depends_on:
       - backend
     networks:
@@ -30,13 +32,16 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
   backend:
     image: ayriko/urban-ko-back:${BACK_VERSION_TAG}
+    pull_policy: always
     container_name: backend-uko
     restart: always
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy  # Attendre que MongoDB soit prêt
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${BACK_PORT}
@@ -47,7 +52,6 @@ services:
     expose:
       - ${BACK_PORT}
     networks:
-      - frontend-network
       - backend-network
     user: '1000:1000'
 
@@ -65,6 +69,12 @@ services:
       - mongo_data:/data/db
     networks:
       - backend-network
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   mongo-express:
     profiles:
