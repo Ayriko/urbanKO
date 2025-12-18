@@ -47,7 +47,6 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${BACK_PORT}
-      SEED_MODE: ${SEED_MODE}
       CORS_ORIGIN: ${CORS_ORIGIN}
       MONGO_URI: ${MONGO_URI}
       JWT_SECRET: ${JWT_SECRET}
